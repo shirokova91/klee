@@ -124,6 +124,11 @@ static int has_permission(int flags, struct stat64 *s) {
   return 1;
 }
 
+int __fd_is_socket(int fd) {
+  if (__exe_env.fds[fd].flags & eOpen & eSocket)
+      return 0;
+  return -1;
+}
 
 int __fd_open(const char *pathname, int flags, mode_t mode) {
   exe_disk_file_t *df;
@@ -137,8 +142,16 @@ int __fd_open(const char *pathname, int flags, mode_t mode) {
     errno = EMFILE;
     return -1;
   }
-  
+ 
   f = &__exe_env.fds[fd];
+
+  if (flags == eSocket) {
+    memset(f, 0, sizeof *f);
+    f->flags |= eOpen;
+    __exe_env.fds[fd].flags = eOpen | eSocket;
+  return fd;
+  }
+
 
   /* Should be the case if file was available, but just in case. */
   memset(f, 0, sizeof *f);

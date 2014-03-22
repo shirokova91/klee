@@ -15,6 +15,7 @@
 #endif
 #include <sys/types.h>
 #include <sys/statfs.h>
+#include <sys/socket.h>
 #include <dirent.h>
 
 typedef struct {  
@@ -27,7 +28,8 @@ typedef enum {
   eOpen         = (1 << 0),
   eCloseOnExec  = (1 << 1),
   eReadable     = (1 << 2),
-  eWriteable    = (1 << 3)
+  eWriteable    = (1 << 3),
+  eSocket       = (1 << 4)
 } exe_file_flag_t;
 
 typedef struct {      
@@ -71,13 +73,15 @@ typedef struct {
 extern exe_file_system_t __exe_fs;
 extern exe_sym_env_t __exe_env;
 
+
+
 void klee_init_fds(unsigned n_files, unsigned file_length, 
 		   int sym_stdout_flag, int do_all_writes_flag, 
 		   unsigned max_failures);
 void klee_init_env(int *argcPtr, char ***argvPtr);
 
 /* *** */
-
+int __fd_is_socket (int fd);
 int __fd_open(const char *pathname, int flags, mode_t mode);
 int __fd_openat(int basefd, const char *pathname, int flags, mode_t mode);
 off64_t __fd_lseek(int fd, off64_t offset, int whence);
